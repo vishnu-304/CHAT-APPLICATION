@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatFlow - Real-time Chat Application</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginContainer">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                        </svg>
+                    </div>
+                    <h1>ChatFlow</h1>
+                </div>
+                <p>Join the conversation and connect with others in real-time</p>
+            </div>
+            
+            <form class="login-form" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Choose your username</label>
+                    <input type="text" id="username" placeholder="Enter your username..." required maxlength="20">
+                </div>
+                
+                <div class="form-group">
+                    <label>Select your avatar</label>
+                    <div class="avatar-selection" id="avatarSelection">
+                        <div class="avatar-option active" data-avatar="👤">👤</div>
+                        <div class="avatar-option" data-avatar="😊">😊</div>
+                        <div class="avatar-option" data-avatar="🚀">🚀</div>
+                        <div class="avatar-option" data-avatar="🎨">🎨</div>
+                        <div class="avatar-option" data-avatar="🌟">🌟</div>
+                        <div class="avatar-option" data-avatar="🎵">🎵</div>
+                        <div class="avatar-option" data-avatar="🏆">🏆</div>
+                        <div class="avatar-option" data-avatar="🌈">🌈</div>
+                    </div>
+                </div>
+                
+                <button type="submit" class="join-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M22 2L11 13"/>
+                        <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+                    </svg>
+                    Join Chat
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Chat Application -->
+    <div class="chat-container" id="chatContainer" style="display: none;">
+        <!-- Header -->
+        <header class="chat-header">
+            <div class="header-left">
+                <div class="logo-small">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                    </svg>
+                </div>
+                <div class="room-info">
+                    <h2>General Chat</h2>
+                    <span class="online-count" id="onlineCount">0 online</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" id="toggleUsers" title="Toggle Users Panel">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                </button>
+                <button class="header-btn" id="leaveChat" title="Leave Chat">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                        <polyline points="16,17 21,12 16,7"/>
+                        <line x1="21" y1="12" x2="9" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main">
+            <!-- Messages Area -->
+            <div class="messages-container">
+                <div class="messages-list" id="messagesList">
+                    <!-- Messages will be populated here -->
+                </div>
+                
+                <!-- Typing Indicators -->
+                <div class="typing-indicators" id="typingIndicators">
+                    <!-- Typing indicators will appear here -->
+                </div>
+            </div>
+
+            <!-- Users Sidebar -->
+            <div class="users-sidebar" id="usersSidebar">
+                <div class="users-header">
+                    <h3>Online Users</h3>
+                    <span class="users-count" id="usersCount">0</span>
+                </div>
+                <div class="users-list" id="usersList">
+                    <!-- Users will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Message Input -->
+        <div class="message-input-container">
+            <form class="message-form" id="messageForm">
+                <div class="input-wrapper">
+                    <input type="text" id="messageInput" placeholder="Type your message..." maxlength="500" autocomplete="off">
+                    <button type="submit" class="send-btn" id="sendBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13"/>
+                            <polygon points="22,2 15,22 11,13 2,9 22,2"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Connection Status -->
+    <div class="connection-status" id="connectionStatus">
+        <div class="status-indicator"></div>
+        <span>Connected</span>
+    </div>
+
+    <script src="chat.js"></script>
+</body>
+</html>
